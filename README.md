@@ -14,8 +14,6 @@ conditions:
 
 ## Method
 
-![Mechanism](mechanism4.png)
-
 The paper identifies attention sinks as a structural consequence of causal
 value aggregation. The first token does not aggregate previous values, so it
 retains higher dimension-wise variance than later tokens. This variance
@@ -23,6 +21,8 @@ discrepancy is propagated by the attention output projection, amplified by FFN
 super neurons, and concentrated into a few outlier dimensions. The resulting
 dimension disparity can lock subsequent query-key projections onto the first
 token.
+
+![Mechanism](mechanism4.png)
 
 HeadNorm targets the source of this chain. For each attention head `h` and
 position `t`, it normalizes the aggregated value output before `W_O`:
