@@ -14,6 +14,8 @@ conditions:
 
 ## Method
 
+![Mechanism](mechanism4.png)
+
 The paper identifies attention sinks as a structural consequence of causal
 value aggregation. The first token does not aggregate previous values, so it
 retains higher dimension-wise variance than later tokens. This variance
@@ -32,7 +34,6 @@ o_hat[t, h] = o[t, h] / RMS(o[t, h]) * gamma[h]
 This stabilizes the scale of value aggregation outputs across positions and
 heads while preserving the standard softmax attention mechanism.
 
-![Mechanism](mechanism4.png)
 
 ## Repository Layout
 
