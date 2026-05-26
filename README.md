@@ -32,6 +32,8 @@ o_hat[t, h] = o[t, h] / RMS(o[t, h]) * gamma[h]
 This stabilizes the scale of value aggregation outputs across positions and
 heads while preserving the standard softmax attention mechanism.
 
+![Mechanism](mechanism4.png)
+
 ## Repository Layout
 
 ```text
