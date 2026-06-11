@@ -249,7 +249,7 @@ class CausalSelfAttention(nn.Module):
 class MLP(nn.Module):
     def __init__(self, config):
         super().__init__()
-        hidden_dim = 4 * config.n_embd 
+        hidden_dim = config.intermediate_size
         self.w1 = nn.Linear(config.n_embd, hidden_dim, bias=False)
         self.w3 = nn.Linear(config.n_embd, hidden_dim, bias=False)
         self.w2 = nn.Linear(hidden_dim, config.n_embd, bias=False)
@@ -276,14 +276,16 @@ class Block(nn.Module):
 
 @dataclass
 class LlamaConfig:
-    block_size: int = 1024
+    block_size: int = 4096
     vocab_size: int = 50304
     n_layer: int = 12
     n_head: int = 12
     n_embd: int = 768
-    n_kv_head: int = None 
+    n_kv_head: int = None
+    intermediate_size: int = 3072
     dropout: float = 0.0
     bias: bool = False
+    precision: str = "bfloat16"
     # --- New Config Params ---
     enable_headnorm: bool = False
     headnorm_shared_weights: bool = True # If True, share weights across heads. If False, per-head weights.

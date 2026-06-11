@@ -104,6 +104,36 @@ The default configs follow the nanoGPT/OpenWebText setup with a 12-layer,
 `gradient_accumulation_steps`, `block_size`, and `max_iters` according to the
 available hardware.
 
+### Model Architecture (Table 3)
+
+| Hyperparameter | Value |
+|----------------|-------|
+| Hidden Size (d) | 768 |
+| Intermediate Size (d_f) | 3072 |
+| Number of Layers (L) | 12 |
+| Number of Heads (H) | 12 |
+| Head Dimension (d_k) | 64 |
+| Vocabulary Size | 50304 |
+| Normalization | RMSNorm |
+| Activation Function | SwiGLU |
+| Position Embedding | RoPE |
+
+### Training Hyperparameters (Table 4)
+
+| Hyperparameter | Value |
+|----------------|-------|
+| Peak Learning Rate | 0.001 |
+| Min Learning Rate | 0.00001 |
+| Warmup Iterations | 2,000 |
+| Max Iterations | 40,000 |
+| Batch Size | 12 |
+| Block Size | 4096 |
+| Grad Accumulation Iters | 5 |
+| Weight Decay | 0.1 |
+| Gradient Clipping | 1.0 |
+| Precision | bfloat16 |
+| Optimizer | AdamW |
+
 ## Checkpoints
 
 Checkpoints are written to `out/baseline` or `out/headnorm` by default. Resume

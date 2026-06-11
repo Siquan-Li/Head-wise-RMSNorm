@@ -9,28 +9,32 @@ wandb_log = False
 wandb_project = "headnorm"
 wandb_run_name = "headnorm"
 
-# 12 * 1024 * 5 * 8 = 491,520 tokens per optimizer step on 8 GPUs.
-batch_size = 12
-block_size = 1024
-gradient_accumulation_steps = 5 * 8
+# Model Architecture (Table 3)
+n_layer = 12
+n_head = 12
+n_embd = 768
+n_kv_head = None
+intermediate_size = 3072
+vocab_size = 50304
 
-max_iters = 600000
-lr_decay_iters = 600000
+# Training Hyperparameters (Table 4)
+batch_size = 12
+block_size = 4096
+gradient_accumulation_steps = 5
+
+max_iters = 40000
+lr_decay_iters = 40000
 
 eval_interval = 1000
 eval_iters = 200
 log_interval = 10
 
-learning_rate = 6e-4
-min_lr = 6e-5
+learning_rate = 1e-3
+min_lr = 1e-5
 warmup_iters = 2000
-weight_decay = 1e-1
+weight_decay = 0.1
 grad_clip = 1.0
-
-n_layer = 12
-n_head = 12
-n_embd = 768
-n_kv_head = None
+precision = "bfloat16"
 
 enable_headnorm = True
 headnorm_shared_weights = False
