@@ -114,17 +114,22 @@ class CausalSelfAttention(nn.Module):
         self.enable_headnorm = config.enable_headnorm
         if self.enable_headnorm:
             self.head_norm = HeadRMSNorm(
-                n_head=self.n_head, 
-                head_dim=self.head_dim, 
+                n_head=self.n_head,
+                head_dim=self.head_dim,
                 shared_weights=config.headnorm_shared_weights
             )
         # ------------------------------
 
+        # --- Sigmoid Attention Configuration ---
+        self.use_sigmoid_attn = config.use_sigmoid_attn
+        # ----------------------------------------
+
         self.flash = hasattr(torch.nn.functional, 'scaled_dot_product_attention')
         if not self.flash:
             print("WARNING: using slow attention.")
-            self.register_buffer("bias", torch.tril(torch.ones(config.block_size, config.block_size))
-                                        .view(1, 1, config.block_size, config.block_size))
+        # Always register causal mask buffer (needed for sigmoid attention)
+        self.register_buffer("bias", torch.tril(torch.ones(config.block_size, config.block_size))
+                                    .view(1, 1, config.block_size, config.block_size))
 
     def forward(self, x, freqs_cis):
         B, T, C = x.size()
@@ -153,7 +158,17 @@ class CausalSelfAttention(nn.Module):
             v = v[:, :, None, :, :].expand(B, self.n_kv_head, n_rep, T, self.head_dim).reshape(B, self.n_head, T, self.head_dim)
 
         # 6. Attention
-        if self.flash:
+        if self.use_sigmoid_attn:
+            # Sigmoid attention: a_i,j = Sigmoid(q_i k_j^T / sqrt(d_k))
+            # No sum-to-one constraint — causal mask sets future positions to 0
+            scale = 1.0 / math.sqrt(k.size(-1))
+            att = (q @ k.transpose(-2, -1)) * scale
+            att = F.sigmoid(att)
+            # Causal mask: zero out future positions (no information leakage)
+            att = att * self.bias[:, :, :T, :T]
+            att = self.attn_dropout(att)
+            y = att @ v
+        elif self.flash:
             y = torch.nn.functional.scaled_dot_product_attention(q, k, v, attn_mask=None, dropout_p=self.dropout if self.training else 0, is_causal=True)
         else:
             att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(k.size(-1)))
@@ -289,6 +304,7 @@ class LlamaConfig:
     # --- New Config Params ---
     enable_headnorm: bool = False
     headnorm_shared_weights: bool = True # If True, share weights across heads. If False, per-head weights.
+    use_sigmoid_attn: bool = False  # If True, replace Softmax with unnormalized Sigmoid attention
 
 class Llama(nn.Module):
 

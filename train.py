@@ -72,7 +72,7 @@ grad_clip = 1.0 # clip gradients at this value, or disable if == 0.0
 decay_lr = True # whether to decay the learning rate
 warmup_iters = 2000 # how many steps to warm up for
 lr_decay_iters = 40000 # should be ~= max_iters per Chinchilla
-min_lr = 1e-5 # minimum learning rate (Table 4)
+min_lr = 1e-4 # minimum learning rate (Table 4)
 # DDP settings
 backend = 'nccl' # 'nccl', 'gloo', etc.
 # system
@@ -255,6 +255,11 @@ if wandb_log and master_process:
     import wandb
     wandb.init(project=wandb_project, name=wandb_run_name, config=config)
 
+if master_process:
+    loss_file = os.path.join(out_dir, 'losses.txt')
+    with open(loss_file, 'w') as f:
+        f.write("iter,train_loss,lr,type,val_loss\n")
+
 # training loop
 X, Y = get_batch('train') # fetch the very first batch
 t0 = time.time()
@@ -272,6 +277,8 @@ while True:
     if iter_num % eval_interval == 0 and master_process:
         losses = estimate_loss()
         print(f"step {iter_num}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+        with open(loss_file, 'a') as f:
+            f.write(f"{iter_num},{losses['train']:.6f},0.0,eval,{losses['val']:.6f}\n")
         if wandb_log:
             wandb.log({
                 "iter": iter_num,
@@ -331,6 +338,8 @@ while True:
             mfu = raw_model.estimate_mfu(batch_size * gradient_accumulation_steps, dt)
             running_mfu = mfu if running_mfu == -1.0 else 0.9*running_mfu + 0.1*mfu
         print(f"iter {iter_num}: loss {lossf:.4f}, time {dt*1000:.2f}ms, mfu {running_mfu*100:.2f}%")
+        with open(loss_file, 'a') as f:
+            f.write(f"{iter_num},{lossf:.6f},{lr:.6e},train,0.0\n")
     iter_num += 1
     local_iter_num += 1
 

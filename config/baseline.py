@@ -30,7 +30,7 @@ eval_iters = 200
 log_interval = 10
 
 learning_rate = 1e-3
-min_lr = 1e-5
+min_lr = 1e-4
 warmup_iters = 2000
 weight_decay = 0.1
 grad_clip = 1.0

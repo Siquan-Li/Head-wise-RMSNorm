@@ -1,13 +1,13 @@
-"""HeadNorm Llama-style pretraining configuration.
+"""Sigmoid Attention Llama-style pretraining configuration.
 
-HeadNorm normalizes each head's value-aggregation output before the output
-projection, matching the intervention proposed in the ICML 2026 paper.
+Replaces Softmax with unnormalized Sigmoid activation (without sum-to-one
+constraint), as described in the ICML 2026 paper and Ramapuram et al. [18].
 """
 
-out_dir = "out/headnorm"
+out_dir = "out/sigmoid"
 wandb_log = False
 wandb_project = "headnorm"
-wandb_run_name = "headnorm"
+wandb_run_name = "sigmoid"
 
 # Model Architecture (Table 3)
 n_layer = 12
@@ -36,5 +36,7 @@ weight_decay = 0.1
 grad_clip = 1.0
 precision = "bfloat16"
 
-enable_headnorm = True
+# Sigmoid attention (no HeadNorm)
+enable_headnorm = False
 headnorm_shared_weights = False
+use_sigmoid_attn = True
